@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+  lighthouse:
+    image: sigp/lighthouse
+    restart: always
+    command: lighthouse beacon --eth1-endpoint https://mainnet.infura.io/v3/e8013249b059464b97f7d049ac27232f --http --http-address 0.0.0.0
+    ports:
+      - 9000:9000
+    volumes:
+      - lighthouse:/root/.lighthouse/mainnet/beacon
+
+  lighthouse_validator:
+    image: sigp/lighthouse
+    restart: always
+    command: lighthouse validator --beacon-node http://lighthouse:5052
+    volumes:
+      - lighthouse_keys:/root/.lighthouse/mainnet/validators
+      # you can safely remove this mount after the keys have been imported
+      - ./validator_keys:/validator_keys
+    depends_on: [ lighthouse ]
+
+  # uncomment if you want to run your own geth node
+  # replace infura url with `http://geth:8545` in lighthouse command to use it
+  # geth:
+  #   image: ethereum/client-go
+  #   command: --http --http.addr 0.0.0.0
+  #   restart: always
+  #   ports:
+  #     - 30303:30303
+  #   volumes:
+  #     - geth:/root/.ethereum
+
+volumes:
+  # geth:
+  lighthouse:
+  lighthouse_keys:
